@@ -45,4 +45,4 @@
   Python
 
 - その他
- Figma
+- Figma
