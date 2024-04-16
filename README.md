@@ -45,4 +45,5 @@
   Python
 
 - その他
+  
   Figma
