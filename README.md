@@ -28,5 +28,6 @@
 - Frontend
 
 - Backend
+  Python
 
 - その他
