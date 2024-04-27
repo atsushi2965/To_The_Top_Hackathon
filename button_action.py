@@ -2,7 +2,11 @@ import os
 import pyaudio
 import sounddevice as sd
 import time
+import pyaudio
+import sounddevice as sd
+import time
 
+#音声処理
 #音声処理
 def play_action(delay_entry, pitch_var, own_key_var, stream_key_var, own_interface_var, stream_interface_var):
     print(f"Delay set to: {delay_entry.get()}")
@@ -10,6 +14,13 @@ def play_action(delay_entry, pitch_var, own_key_var, stream_key_var, own_interfa
     print(f"Own Key set to: {own_key_var.get()}")
     print(f"Stream Key set to: {stream_key_var.get()}")
     print(f"Stream Output Interface: {stream_interface_var.get()}")
+
+
+    #入出力インターフェース設定未
+    #遅延処理未
+    #OBS関連チェック未
+
+
 
     # ストリーム設定
     chunk = 1024  # フレームあたりのサンプル数
