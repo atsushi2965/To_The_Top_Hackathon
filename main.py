@@ -9,6 +9,7 @@ def validate_input(P):
     return P.isdigit() or P == ""
 
 def list_audio_interfaces():
+    #
     interfaces = sd.query_devices()
     unique_devices = set()
     for device in interfaces:
