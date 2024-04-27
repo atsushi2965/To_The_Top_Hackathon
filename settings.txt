@@ -10,3 +10,6 @@ stream_key_default=0
 own_interface_label=Select own output interface:
 stream_interface_label=Select stream output interface:
 play_button=Play
+preview_button=Preview
+file_label=Select an audio source:
+file_add=Add files

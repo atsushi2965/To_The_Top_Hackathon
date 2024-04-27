@@ -1,10 +1,8 @@
-from numpy import sign
 import os
 import sounddevice as sd
-import tkinter as tk
-from tkinter import LEFT, RIGHT, W, BooleanVar, Button, Frame, IntVar, Label, OptionMenu, Radiobutton, Spinbox, StringVar  # Entry (& some of OptionMenu) -> Spinbox
+from tkinter import ACTIVE, LEFT, RIGHT, W, BooleanVar, Button, Frame, IntVar, Label, Listbox, OptionMenu, Radiobutton, Spinbox, StringVar, Tk, filedialog  # Entry (& some of OptionMenu) -> Spinbox
 
-from button_action import play_action
+from button_action import add_file, key_radio_toggle, play_action, preview_action, update_radio_buttons
 from settings import load_settings
 
 
@@ -26,15 +24,24 @@ settings = load_settings("settings.txt")
 
 
 def main():
-    root = tk.Tk()
+    root = Tk()
     root.title(settings['title'])
 
     audio_interfaces = list_audio_interfaces()
 
     # vcmd = (root.register(validate_input), '%P')
 
+    file_frame = Frame(root)
+    file_frame.pack(side=LEFT, padx=10, pady=10)
+    file_label = Label(file_frame, text=settings['file_label'])
+    file_label.pack()
+    file_list = Listbox(file_frame)
+    file_list.pack()
+    file_add = Button(file_frame, text=settings['file_add'], command=lambda: add_file(file_list))
+    file_add.pack()
+
     delay_frame = Frame(root)
-    delay_frame.pack(padx=10, pady=10)
+    delay_frame.pack(pady=10)
     delay_label = Label(delay_frame, text=settings['delay_label'])
     delay_label.pack(side=LEFT)
     delay_var = IntVar(value=int(settings['delay_entry_default']))
@@ -70,60 +77,39 @@ def main():
 
     key_radio = BooleanVar()
 
-    def key_radio_toggle():
-        if key_radio.get():  # True: stream
-            own_key_menu.pack_forget()
-            own_key_radio2.pack(side=LEFT)
-            own_key_radio1.pack(side=LEFT)  # less on left
-            stream_key_menu.pack(side=LEFT)
-            stream_key_radio2.pack_forget()
-            stream_key_radio1.pack_forget()
-        else:  # False: own
-            own_key_menu.pack(side=LEFT)
-            own_key_radio2.pack_forget()
-            own_key_radio1.pack_forget()
-            stream_key_menu.pack_forget()
-            stream_key_radio2.pack(side=LEFT)
-            stream_key_radio1.pack(side=LEFT)  # less on left
-
-    def update_radio_buttons():
-        own_key1 = (stream_key_var.get() - pitch_var.get()) % 12
-        own_key2 = own_key1 - 12*sign(own_key1) if own_key1 != 0 else 12*sign(pitch_var.get())
-        stream_key1 = (own_key_var.get() + pitch_var.get()) % 12
-        stream_key2 = stream_key1 - 12*sign(stream_key1) if stream_key1 != 0 else 12*sign(pitch_var.get())
-        own_key_radio1.config(text=f"{own_key1:+}")
-        own_key_radio2.config(text=f"{own_key2:+}")
-        stream_key_radio1.config(text=f"{stream_key1:+}")
-        stream_key_radio2.config(text=f"{stream_key2:+}")
-        own_key_radio1['value'] = own_key1
-        own_key_radio2['value'] = own_key2
-        stream_key_radio1['value'] = stream_key1
-        stream_key_radio2['value'] = stream_key2
-
     own_key_frame = Frame(root)
     own_key_frame.pack(anchor=W)
-    own_key_label = Radiobutton(own_key_frame, text=settings['own_key_label'], variable=key_radio, value=False, command=key_radio_toggle)
+    own_key_label = Radiobutton(own_key_frame, text=settings['own_key_label'], variable=key_radio, value=False)
     own_key_label.pack(side=LEFT)
     own_key_var = IntVar(int(settings['own_key_default']))
     own_key_menu = Spinbox(own_key_frame, textvariable=own_key_var, from_=-12, to=12, increment=1, format='%+1.0f', width=4, wrap=True)
     own_key_radio1 = Radiobutton(own_key_frame, variable=own_key_var)
     own_key_radio2 = Radiobutton(own_key_frame, variable=own_key_var)
+    own_key_preview = Button(own_key_frame, text=settings['preview_button'], command=lambda: preview_action(own_key_var,  own_interface_var, file_list.get(ACTIVE)))
+    own_key_preview.pack(side=RIGHT)
 
     stream_key_frame = Frame(root)
     stream_key_frame.pack(anchor=W)
-    stream_key_label = Radiobutton(stream_key_frame, text=settings['stream_key_label'], variable=key_radio, value=True, command=key_radio_toggle)
+    stream_key_label = Radiobutton(stream_key_frame, text=settings['stream_key_label'], variable=key_radio, value=True)
     stream_key_label.pack(side=LEFT)
     stream_key_var = IntVar(int(settings['stream_key_default']))
     stream_key_menu = Spinbox(stream_key_frame, textvariable=stream_key_var, from_=-12, to=12, increment=1, format='%+1.0f', width=4, wrap=True)
     stream_key_radio1 = Radiobutton(stream_key_frame, variable=stream_key_var)
     stream_key_radio2 = Radiobutton(stream_key_frame, variable=stream_key_var)
+    stream_key_preview = Button(stream_key_frame, text=settings['preview_button'], command=lambda: preview_action(stream_key_var,  own_interface_var, file_list.get(ACTIVE)))
+    stream_key_preview.pack(side=RIGHT)
 
-    own_key_var.trace('w', lambda *args: update_radio_buttons())
-    stream_key_var.trace('w', lambda *args: update_radio_buttons())
-    pitch_var.trace('w', lambda *args: update_radio_buttons())
+    toggles = [key_radio, own_key_menu, own_key_radio2, own_key_radio1, stream_key_menu, stream_key_radio2, stream_key_radio1]
+    own_key_label.config(command=lambda: key_radio_toggle(*toggles))
+    stream_key_label.config(command=lambda: key_radio_toggle(*toggles))
+
+    updates = [stream_key_var, pitch_var, own_key_var, own_key_radio1, own_key_radio2, stream_key_radio1, stream_key_radio2]
+    own_key_var.trace('w', lambda *args: update_radio_buttons(*updates))
+    stream_key_var.trace('w', lambda *args: update_radio_buttons(*updates))
+    pitch_var.trace('w', lambda *args: update_radio_buttons(*updates))
     
-    update_radio_buttons()
-    key_radio_toggle()
+    update_radio_buttons(*updates)
+    key_radio_toggle(*toggles)
 
     own_interface_label = Label(root, text=settings['own_interface_label'])
     own_interface_label.pack()
@@ -139,7 +125,7 @@ def main():
     stream_interface_menu = OptionMenu(root, stream_interface_var, *audio_interfaces)
     stream_interface_menu.pack()
 
-    play_button = Button(root, text=settings['play_button'], command=lambda: play_action(delay_entry, pitch_var, own_key_var, stream_key_var, own_interface_var, stream_interface_var))
+    play_button = Button(root, text=settings['play_button'], command=lambda: play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, stream_interface_var, file_list.get(ACTIVE)))
     play_button.pack()
 
     root.mainloop()
