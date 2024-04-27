@@ -2,7 +2,11 @@ import os
 import pyaudio
 import sounddevice as sd
 import time
+import pyaudio
+import sounddevice as sd
+import time
 
+#音声処理
 #音声処理
 def play_action(delay_entry, pitch_var, own_key_var, stream_key_var, own_interface_var, stream_interface_var):
     print(f"Delay set to: {delay_entry.get()}")
