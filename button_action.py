@@ -80,7 +80,7 @@ def sub(which: str, hosts):
     return selected_host.get()
 
 # GUI更新 (ﾎﾞﾀﾝ群制御)
-def toggle_button_state(is_playing: bool, play_button, pause_button, stop_button):
+def toggle_buttons(is_playing: bool, play_button, pause_button, stop_button):
     if is_playing:
         play_button.config(state='disabled')
         pause_button.config(state='normal')
@@ -125,7 +125,7 @@ def stop_audio(play_button, pause_button, stop_button):
     for thread in threads:
         thread.join()
     stop_event.clear()
-    toggle_button_state(False, play_button, pause_button, stop_button)
+    toggle_buttons(False, play_button, pause_button, stop_button)
     threads.clear()
 
 # 再生部 (中枢)
@@ -145,7 +145,7 @@ def preview_action(key_var, own_interface_var, audio_path, play_button, pause_bu
     y_shifted, sr = pitch_shift(audio_path, key_var.get())
     print("shifted")
     thread = Thread(target=play_audio, args=(y_shifted, sr, find_host_id(own_interface_var.get())))
-    toggle_button_state(True, play_button, pause_button, stop_button)
+    toggle_buttons(True, play_button, pause_button, stop_button)
     thread.start()
     threads.append(thread)
     print("preview action finished")
@@ -166,7 +166,7 @@ def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, str
     own_thread = Thread(target=play_audio, args=(own_shifted, own_sr, own_host_id))
     stream_thread = Thread(target=play_audio, args=(stream_shifted, stream_sr, stream_host_id))
 
-    toggle_button_state(True, play_button, pause_button, stop_button)
+    toggle_buttons(True, play_button, pause_button, stop_button)
     own_thread.start()
     sd.sleep(int(delay_entry.get()))
     stream_thread.start()
