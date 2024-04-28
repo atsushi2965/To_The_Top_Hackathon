@@ -1,7 +1,10 @@
-from numpy import sign
+import librosa
+from numpy import arange, round, sign
 import os
-import pyaudio
+# import pyaudio
 import sounddevice as sd
+import soundfile as sf
+from threading import Thread
 import time
 from tkinter import END, LEFT, filedialog
 
@@ -45,9 +48,36 @@ def add_file(file_list):
         file_list.insert(END, file_path)
 
 
+# 音声処理 (波形ｷｰ変更)
+def pitch_shift(audio_path, semitones):
+    y, sr = librosa.load(audio_path, sr=None)
+    y_shifted = librosa.effects.pitch_shift(y, sr, n_steps=semitones)
+    print("shifted")
+    return y_shifted, sr
+
+# 音声処理 (再生部)
+def play_audio(audio, fs, interface):
+    def play():
+        sd.default.device = interface
+        sd.play(audio, fs)
+        sd.wait()
+    thread = Thread(target=play)
+    thread.start()
+    return thread
+
 # 音声処理 (試聴)
 def preview_action(key_var, own_interface_var, audio_path):
-    print("test")
+    data, fs = sf.read(audio_path)
+    key_data = change_key(data, key_var.get())
+    play_audio(key_data, fs, own_interface_var.get())
+
+# デバイス検出
+def find_device_id(device_name, api_name):
+    devices = sd.query_devices()
+    for device in devices:
+        if device_name in device['name'] and api_name in device['hostapi']:
+            return device['index']
+    return None
 
 #音声処理
 def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, stream_interface_var, audio_path):
@@ -57,49 +87,20 @@ def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, str
     print(f"Stream Key set to: {stream_key_var.get()}")
     print(f"Stream Output Interface: {stream_interface_var.get()}")
 
+    own_shifted, own_sr = pitch_shift(audio_path, own_key_var.get())
+    stream_shifted, stream_sr = pitch_shift(audio_path, stream_key_var.get())
 
-    #入出力インターフェース設定未
-    #遅延処理未
-    #OBS関連チェック未
-
-
-
-    # ストリーム設定
-    chunk = 1024  # フレームあたりのサンプル数
-    format = pyaudio.paInt16  # サンプルフォーマット
-    channels = 1  # チャンネル数
-    rate = 44100  # サンプリングレート (Hz)
-
-    # PyAudioオブジェクトの作成
-    audio = pyaudio.PyAudio()
-
-    # マイクストリームの開始
-    stream_in = audio.open(input=True,
-                     format=format,
-                     channels=channels,
-                     rate=rate,
-                     frames_per_buffer=chunk)
-
-    # スピーカーストリームの開始
-    stream_out = audio.open(output=True,
-                      format=format,
-                      channels=channels,
-                      rate=rate,
-                      frames_per_buffer=chunk)
+    own_device_id = find_device_id(own_interface_var.get(), 'Windows DirectSound')
+    stream_device_id = find_device_id(stream_interface_var.get(), 'Windows DirectSound')
 
     try:
-        while True:
-            # マイクからデータを読み込む
-            data = stream_in.read(chunk)
+        own_thread = play_audio(own_shifted, own_sr, own_device_id)
+        time.sleep(int(delay_entry.get()) / 1000)
+        stream_thread = play_audio(stream_shifted, stream_sr, stream_device_id)
 
-            # スピーカーに出力
-            stream_out.write(data)
-    except KeyboardInterrupt:
-        # 終了処理
-        stream_in.stop_stream()
-        stream_out.stop_stream()
-        stream_in.close()
-        stream_out.close()
-        audio.terminate()
+        # own_thread.join()
+        # stream_thread.join()
+    except Exception as e:
+        print(f"{e}")
 
     print("終了しました。")

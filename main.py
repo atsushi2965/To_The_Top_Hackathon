@@ -16,7 +16,7 @@ def list_audio_interfaces():
     unique_devices = set()
     for device in interfaces:
         if device['max_output_channels'] > 0:
-            unique_devices.add(device['name'])
+            unique_devices.add(f"{device['name']} ({device['hostapi']})")
     return list(unique_devices)
 
 
@@ -56,7 +56,7 @@ def main():
     pitch_label = Label(pitch_frame, text=settings['pitch_label'])
     pitch_label.pack(side=LEFT)
     # key_options = [f"{i:+}" if i != 0 else "±0" for i in range(-12, 13)]
-    pitch_var = IntVar(int(settings['pitch_default']))
+    pitch_var = IntVar(value=int(settings['pitch_default']))
     # pitch_var.set(settings['pitch_default'])
     pitch_menu = Spinbox(pitch_frame, textvariable=pitch_var, from_=-12, to=12, increment=1, format='%+1.0f', width=4, wrap=True)
     pitch_menu.pack(side=LEFT)
