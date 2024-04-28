@@ -1,4 +1,4 @@
-title=Audio Settings
+title=Accompaniment Settings
 delay_label=Voice changer delay (ms):
 delay_entry_default=0
 pitch_label=Voice changer pitch:

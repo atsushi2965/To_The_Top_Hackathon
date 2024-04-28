@@ -85,7 +85,7 @@ def main():
     own_key_menu = Spinbox(own_key_frame, textvariable=own_key_var, from_=-12, to=12, increment=1, format='%+1.0f', width=4, wrap=True)
     own_key_radio1 = Radiobutton(own_key_frame, variable=own_key_var)
     own_key_radio2 = Radiobutton(own_key_frame, variable=own_key_var)
-    own_key_preview = Button(own_key_frame, text=settings['preview_button'], command=lambda: preview_action(own_key_var,  own_interface_var, file_list.get(ACTIVE)))
+    own_key_preview = Button(own_key_frame, text=settings['preview_button'], command=lambda: preview_action(own_key_var,  own_interface_var, file_list.get(ACTIVE), play_button, pause_button, stop_button))
     own_key_preview.pack(side=RIGHT)
 
     stream_key_frame = Frame(root)
@@ -96,7 +96,7 @@ def main():
     stream_key_menu = Spinbox(stream_key_frame, textvariable=stream_key_var, from_=-12, to=12, increment=1, format='%+1.0f', width=4, wrap=True)
     stream_key_radio1 = Radiobutton(stream_key_frame, variable=stream_key_var)
     stream_key_radio2 = Radiobutton(stream_key_frame, variable=stream_key_var)
-    stream_key_preview = Button(stream_key_frame, text=settings['preview_button'], command=lambda: preview_action(stream_key_var,  own_interface_var, file_list.get(ACTIVE)))
+    stream_key_preview = Button(stream_key_frame, text=settings['preview_button'], command=lambda: preview_action(stream_key_var,  own_interface_var, file_list.get(ACTIVE), play_button, pause_button, stop_button))
     stream_key_preview.pack(side=RIGHT)
 
     toggles = [key_radio, own_key_menu, own_key_radio2, own_key_radio1, stream_key_menu, stream_key_radio2, stream_key_radio1]
