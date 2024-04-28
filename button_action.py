@@ -108,7 +108,6 @@ def find_host_id(device_name):
 def pitch_shift(audio_path, semitones):
     y, sr = librosa.load(audio_path, sr=None)
     y_shifted = librosa.effects.pitch_shift(y, sr, n_steps=semitones)
-    print("shifted")
     return y_shifted, sr
 
 # 再生部 (ぱうせ)
@@ -140,14 +139,26 @@ def play_audio(audio, fs, interface):
             stream.write(sample)
 
 # 音声処理 (試聴)
-def preview_action(key_var, own_interface_var, audio_path):
+def preview_action(key_var, own_interface_var, audio_path, play_button, pause_button, stop_button):
+    print("preview pushed")
+    print("preview shifting...", end=' ')
     y_shifted, sr = pitch_shift(audio_path, key_var.get())
-    threads += Thread(target=play_audio, args=(y_shifted, sr, find_host_id(own_interface_var.get())))
+    print("shifted")
+    thread = Thread(target=play_audio, args=(y_shifted, sr, find_host_id(own_interface_var.get())))
+    toggle_button_state(True, play_button, pause_button, stop_button)
+    thread.start()
+    threads.append(thread)
+    print("preview action finished")
 
 # 音声処理 (中枢)
 def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, stream_interface_var, audio_path, play_button, pause_button, stop_button):
+    print("play pushed")
+    print("own shifting...", end=' ')
     own_shifted, own_sr = pitch_shift(audio_path, own_key_var.get())
+    print("shifted")
+    print("stream shifting...", end=' ')
     stream_shifted, stream_sr = pitch_shift(audio_path, stream_key_var.get())
+    print("shifted")
 
     own_host_id = find_host_id(own_interface_var.get())
     stream_host_id = find_host_id(stream_interface_var.get())
@@ -217,4 +228,4 @@ def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, str
     '''
 
     threads.extend([own_thread, stream_thread])
-    print("終了しました。")
+    print("play action finished")
