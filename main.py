@@ -1,8 +1,8 @@
 import os
 import sounddevice as sd
-from tkinter import ACTIVE, LEFT, RIGHT, W, BooleanVar, Button, Frame, IntVar, Label, Listbox, OptionMenu, Radiobutton, Spinbox, StringVar, Tk, filedialog  # Entry (& some of OptionMenu) -> Spinbox
+from tkinter import ACTIVE, LEFT, RIGHT, W, BooleanVar, Button, Frame, IntVar, Label, Listbox, OptionMenu, Radiobutton, Spinbox, StringVar, Tk  # Entry (& some of OptionMenu) -> Spinbox
 
-from button_action import add_file, key_radio_toggle, play_action, preview_action, update_radio_buttons
+from button_action import add_file, key_radio_toggle, pause_toggle, play_action, preview_action, stop_audio, update_radio_buttons
 from settings import load_settings
 
 
@@ -16,7 +16,7 @@ def list_audio_interfaces():
     unique_devices = set()
     for device in interfaces:
         if device['max_output_channels'] > 0:
-            unique_devices.add(f"{device['name']} ({device['hostapi']})")
+            unique_devices.add(device['name'])
     return list(unique_devices)
 
 
@@ -44,7 +44,7 @@ def main():
     delay_frame.pack(pady=10)
     delay_label = Label(delay_frame, text=settings['delay_label'])
     delay_label.pack(side=LEFT)
-    delay_var = IntVar(value=int(settings['delay_entry_default']))
+    delay_var = IntVar(int(settings['delay_entry_default']))
     delay_entry = Spinbox(delay_frame, textvariable=delay_var, from_=0, to=8191, increment=1, width=4, justify=RIGHT)
     # delay_entry.insert(0, settings['delay_entry_default'])
     delay_entry.pack(side=LEFT)
@@ -56,7 +56,7 @@ def main():
     pitch_label = Label(pitch_frame, text=settings['pitch_label'])
     pitch_label.pack(side=LEFT)
     # key_options = [f"{i:+}" if i != 0 else "±0" for i in range(-12, 13)]
-    pitch_var = IntVar(value=int(settings['pitch_default']))
+    pitch_var = IntVar(int(settings['pitch_default']))
     # pitch_var.set(settings['pitch_default'])
     pitch_menu = Spinbox(pitch_frame, textvariable=pitch_var, from_=-12, to=12, increment=1, format='%+1.0f', width=4, wrap=True)
     pitch_menu.pack(side=LEFT)
@@ -125,8 +125,14 @@ def main():
     stream_interface_menu = OptionMenu(root, stream_interface_var, *audio_interfaces)
     stream_interface_menu.pack()
 
-    play_button = Button(root, text=settings['play_button'], command=lambda: play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, stream_interface_var, file_list.get(ACTIVE)))
-    play_button.pack()
+    button_frame = Frame(root)
+    button_frame.pack()
+    play_button = Button(button_frame, text=settings['play_button'], command=lambda: play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, stream_interface_var, file_list.get(ACTIVE), play_button, pause_button, stop_button))
+    play_button.pack(side=LEFT)
+    pause_button = Button(button_frame, text=settings['pause_button'], state='disabled', command=lambda: pause_toggle(stop_button))
+    pause_button.pack(side=LEFT)
+    stop_button = Button(button_frame, text=settings['stop_button'], state='disabled', command=lambda: stop_audio(play_button, pause_button, stop_button))
+    stop_button.pack(side=LEFT)
 
     root.mainloop()
 
