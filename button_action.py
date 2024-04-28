@@ -129,7 +129,7 @@ def stop_audio(play_button, pause_button, stop_button):
     threads.clear()
 
 # 再生部 (中枢)
-def play_audio(audio, fs, interface, play_button, pause_button, stop_button):
+def play_audio(audio, fs, interface):
     channels = audio.shape[1] if audio.ndim > 1 else 1
     with sd.OutputStream(device=interface, samplerate=fs, channels=channels) as stream:
         for sample in audio:
@@ -137,7 +137,6 @@ def play_audio(audio, fs, interface, play_button, pause_button, stop_button):
                 break
             pause_event.wait()
             stream.write(sample)
-    toggle_button_state(False, play_button, pause_button, stop_button)
 
 # 音声処理 (試聴)
 def preview_action(key_var, own_interface_var, audio_path, play_button, pause_button, stop_button):
@@ -145,7 +144,7 @@ def preview_action(key_var, own_interface_var, audio_path, play_button, pause_bu
     print("preview shifting...", end=' ')
     y_shifted, sr = pitch_shift(audio_path, key_var.get())
     print("shifted")
-    thread = Thread(target=play_audio, args=(y_shifted, sr, find_host_id(own_interface_var.get()), play_button, pause_button, stop_button))
+    thread = Thread(target=play_audio, args=(y_shifted, sr, find_host_id(own_interface_var.get())))
     toggle_button_state(True, play_button, pause_button, stop_button)
     thread.start()
     threads.append(thread)
@@ -164,8 +163,8 @@ def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, str
     own_host_id = find_host_id(own_interface_var.get())
     stream_host_id = find_host_id(stream_interface_var.get())
 
-    own_thread = Thread(target=play_audio, args=(own_shifted, own_sr, own_host_id, play_button, pause_button, stop_button))
-    stream_thread = Thread(target=play_audio, args=(stream_shifted, stream_sr, stream_host_id, play_button, pause_button, stop_button))
+    own_thread = Thread(target=play_audio, args=(own_shifted, own_sr, own_host_id))
+    stream_thread = Thread(target=play_audio, args=(stream_shifted, stream_sr, stream_host_id))
 
     toggle_button_state(True, play_button, pause_button, stop_button)
     own_thread.start()
