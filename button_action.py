@@ -38,10 +38,10 @@ def update_radio_buttons(stream_key_var, pitch_var, own_key_var, own_key_radio1,
     own_key2 = own_key1 - 12*sign(own_key1) if own_key1 != 0 else 12 * sign(pitch_var.get())
     stream_key1 = (own_key_var.get() + pitch_var.get()) % 12
     stream_key2 = stream_key1 - 12*sign(stream_key1) if stream_key1 != 0 else 12 * sign(pitch_var.get())
-    own_key_radio1.config(text=f"{own_key1:+}")
-    own_key_radio2.config(text=f"{own_key2:+}")
-    stream_key_radio1.config(text=f"{stream_key1:+}")
-    stream_key_radio2.config(text=f"{stream_key2:+}")
+    own_key_radio1.config(text=f'{own_key1:+}')
+    own_key_radio2.config(text=f'{own_key2:+}')
+    stream_key_radio1.config(text=f'{stream_key1:+}')
+    stream_key_radio2.config(text=f'{stream_key2:+}')
     own_key_radio1['value'] = own_key1
     own_key_radio2['value'] = own_key2
     stream_key_radio1['value'] = stream_key1
@@ -49,7 +49,7 @@ def update_radio_buttons(stream_key_var, pitch_var, own_key_var, own_key_radio1,
 
 # GUI更新 (ﾊﾟｽ追加)
 def add_file(file_list):
-    file_path = filedialog.askopenfilename(filetypes=[("libsndfile対応フォーマット", '*.wav;*.aiff;*.au;*.raw;*.paf;*.8svx;*.nist;*.sf;*.voc;*.w64;*.pvf;*.xi;*.caf;*.sd2;*.flac;*.ogg')])
+    file_path = filedialog.askopenfilename(filetypes=[('libsndfile対応フォーマット', '*.wav;*.aiff;*.au;*.raw;*.paf;*.8svx;*.nist;*.sf;*.voc;*.w64;*.pvf;*.xi;*.caf;*.sd2;*.flac;*.ogg')])
     if file_path:
         file_list.insert(END, file_path)
 
@@ -63,10 +63,10 @@ def sub(which: str, hosts):
         top.destroy()
 
     top = Toplevel()
-    top.title("Select Host")
+    top.title('Select Host')
 
     selected_host = StringVar(top)
-    Label(top, text=f"Multiple devices found.\nSelect {which} host:").pack(padx=10, pady=10)
+    Label(top, text=f'Multiple devices found.\nSelect {which} host:').pack(padx=10, pady=10)
     lb = Listbox(top)
     lb.pack()
 
@@ -140,25 +140,25 @@ def play_audio(audio, fs, interface):
 
 # 音声処理 (試聴)
 def preview_action(key_var, own_interface_var, audio_path, play_button, pause_button, stop_button):
-    print("preview pushed")
-    print("preview shifting...", end=' ')
+    print('preview pushed')
+    print('preview shifting...', end=' ')
     y_shifted, sr = pitch_shift(audio_path, key_var.get())
-    print("shifted")
+    print('shifted')
     thread = Thread(target=play_audio, args=(y_shifted, sr, find_host_id(own_interface_var.get())))
     toggle_buttons(True, play_button, pause_button, stop_button)
     thread.start()
     threads.append(thread)
-    print("preview action finished")
+    print('preview action finished')
 
 # 音声処理 (中枢)
 def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, stream_interface_var, audio_path, play_button, pause_button, stop_button):
-    print("play pushed")
-    print("own shifting...", end=' ')
+    print('play pushed')
+    print('own shifting...', end=' ')
     own_shifted, own_sr = pitch_shift(audio_path, own_key_var.get())
-    print("shifted")
-    print("stream shifting...", end=' ')
+    print('shifted')
+    print('stream shifting...', end=' ')
     stream_shifted, stream_sr = pitch_shift(audio_path, stream_key_var.get())
-    print("shifted")
+    print('shifted')
 
     own_host_id = find_host_id(own_interface_var.get())
     stream_host_id = find_host_id(stream_interface_var.get())
@@ -175,14 +175,14 @@ def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, str
     #     own_thread.join()
     #     stream_thread.join()
     # except Exception as e:
-    #     print(f"{e}")
+    #     print(f'{e}')
 
     '''
-    print(f"Delay set to: {delay_entry.get()}")
-    # print(f"Pitch set to: {pitch_var.get()}")
-    print(f"Own Key set to: {own_key_var.get()}")
-    print(f"Stream Key set to: {stream_key_var.get()}")
-    print(f"Stream Output Interface: {stream_interface_var.get()}")
+    print(f'Delay set to: {delay_entry.get()}')
+    # print(f'Pitch set to: {pitch_var.get()}')
+    print(f'Own Key set to: {own_key_var.get()}')
+    print(f'Stream Key set to: {stream_key_var.get()}')
+    print(f'Stream Output Interface: {stream_interface_var.get()}')
 
     #入出力インターフェース設定未
     #遅延処理未
@@ -228,4 +228,4 @@ def play_action(delay_entry, own_key_var, stream_key_var, own_interface_var, str
     '''
 
     threads.extend([own_thread, stream_thread])
-    print("play action finished")
+    print('play action finished')

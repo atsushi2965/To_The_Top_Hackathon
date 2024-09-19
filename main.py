@@ -20,7 +20,7 @@ def list_audio_interfaces():
     return list(unique_devices)
 
 
-settings = load_settings("settings.txt")
+settings = load_settings('settings.txt')
 
 
 def main():
@@ -137,5 +137,5 @@ def main():
     root.mainloop()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

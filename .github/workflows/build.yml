@@ -1,10 +1,12 @@
-name: Build EXE
+name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -12,24 +14,42 @@ permissions:
 jobs:
   build:
 
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: 
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.9.13
-      uses: actions/setup-python@v3
+    - name: Setup Python 3.9
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.9.13"
+        python-version: 3.9
+        cache: pip
+        check-latest: true
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install librosa numpy sounddevice soundfile
-        # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Compile with Nuitka
       uses: Nuitka/Nuitka-Action@main
       with:
         nuitka-version: main
-        script-name: main.py
+        script-name: main
         standalone: true
         onefile: true
-        enable-plugins: tk-inter
+        python-flag: |
+          isolated
+          -O
+          no_docstrings
+          -S
+        show-scons: true
+        enable-plugins: anti-bloat,implicit-imports,numpy,tk-inter
+    - name: Archive build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: built-files-${{ matrix.os }}
+        path: build
