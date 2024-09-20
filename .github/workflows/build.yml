@@ -64,3 +64,4 @@ jobs:
       with:
         name: built-files-${{ matrix.os }}
         path: build
+        compression-level: 9

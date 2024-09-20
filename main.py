@@ -1,13 +1,8 @@
-import os
 import sounddevice as sd
-from tkinter import ACTIVE, LEFT, RIGHT, W, BooleanVar, Button, Frame, IntVar, Label, Listbox, OptionMenu, Radiobutton, Spinbox, StringVar, Tk  # Entry (& some of OptionMenu) -> Spinbox
+from tkinter import ACTIVE, LEFT, RIGHT, W, BooleanVar, Button, Frame, IntVar, Label, Listbox, OptionMenu, Radiobutton, Spinbox, StringVar, Tk
 
 from button_action import add_file, key_radio_toggle, pause_toggle, play_action, preview_action, stop_audio, update_radio_buttons
-from settings import load_settings
-
-
-# def validate_input(P):
-#     return P.isdigit() or P == ""
+from settings import settings
 
 
 def list_audio_interfaces():
@@ -18,9 +13,6 @@ def list_audio_interfaces():
         if device['max_output_channels'] > 0:
             unique_devices.add(device['name'])
     return list(unique_devices)
-
-
-settings = load_settings('settings.txt')
 
 
 def main():

@@ -1,11 +1,10 @@
 import librosa
 from numpy import arange, round, sign
-import os
+print('numpy done')
 # import pyaudio
 import sounddevice as sd
-import soundfile as sf
 from threading import Event, Thread
-# import time
+print('threading done')
 from tkinter import END, LEFT, Label, Listbox, StringVar, Toplevel, filedialog
 
 
