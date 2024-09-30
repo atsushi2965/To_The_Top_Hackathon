@@ -1,2 +1,4 @@
 librosa
+samplerate	# from librosa
 sounddevice
+tqdm
