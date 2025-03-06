@@ -2,11 +2,9 @@ from functools import wraps
 from librosa import ParameterError, cache, core, get_fftlib  # 0.10.2.post1
 from librosa.filters import get_window, window_sumsquare
 from librosa.util import MAX_MEM_BLOCK, expand_to, dtype_c2r, dtype_r2c, fix_length, frame, is_positive_int, pad_center, phasor, tiny, valid_audio
-from numpy import abs, allclose, angle, apply_along_axis, arange, asarray, ceil, empty_like, float64, gcd as npgcd, iscomplexobj, mod, pad, pi, prod, round, sqrt, zeros, zeros_like
-import resampy
-import samplerate
-from scipy import signal
-import soxr
+from numpy import abs, allclose, angle, apply_along_axis, arange, asarray, ceil, empty_like, float64, iscomplexobj, mod, pad, pi, prod, round, sqrt, zeros, zeros_like  # gcd as npgcd
+# from scipy import signal
+# import soxr
 from time import get_clock_info
 from tqdm.auto import tqdm, trange
 from typing import Union
@@ -29,48 +27,50 @@ def resample(y, *, orig_sr, target_sr, res_type='soxr_hq', fix=True, scale=False
 
     n_samples = int(ceil(y.shape[axis] * ratio))
 
-    if res_type in ('scipy', 'fft'):
-        y_hat = signal.resample(y, n_samples, axis=axis)
-    elif res_type == 'polyphase':
-        if int(orig_sr) != orig_sr or int(target_sr) != target_sr:
-            raise ParameterError(
-                'polyphase resampling is only supported for integer-valued sampling rates.'
-            )
+    # if res_type in ('scipy', 'fft'):
+    #     y_hat = signal.resample(y, n_samples, axis=axis)
+    # elif res_type == 'polyphase':
+    #     if int(orig_sr) != orig_sr or int(target_sr) != target_sr:
+    #         raise ParameterError(
+    #             'polyphase resampling is only supported for integer-valued sampling rates.'
+    #         )
 
-        # For polyphase resampling, we need up- and down-sampling ratios
-        # We can get those from the greatest common divisor of the rates
-        # as long as the rates are integrable
-        orig_sr = int(orig_sr)
-        target_sr = int(target_sr)
-        gcd = npgcd(orig_sr, target_sr)
-        y_hat = signal.resample_poly(
-            y, target_sr // gcd, orig_sr // gcd, axis=axis
-        )
-    elif res_type in (
-        'linear',
-        'zero_order_hold',
-        'sinc_best',
-        'sinc_fastest',
-        'sinc_medium',
-    ):
-        # Use numpy to vectorize the resampler along the target axis
-        # This is because samplerate does not support ndim>2 generally.
-        y_hat = apply_along_axis(
-            samplerate.resample, axis=axis, arr=y, ratio=ratio, converter_type=res_type, verbose=True
-        )
-    elif res_type.startswith('soxr'):
-        # Use numpy to vectorize the resampler along the target axis
-        # This is because soxr does not support ndim>2 generally.
-        y_hat = apply_along_axis(
-            soxr.resample,
-            axis=axis,
-            arr=y,
-            in_rate=orig_sr,
-            out_rate=target_sr,
-            quality=res_type,
-        )
-    else:
-        y_hat = resampy.resample(y, orig_sr, target_sr, filter=res_type, axis=axis)
+    #     # For polyphase resampling, we need up- and down-sampling ratios
+    #     # We can get those from the greatest common divisor of the rates
+    #     # as long as the rates are integrable
+    #     orig_sr = int(orig_sr)
+    #     target_sr = int(target_sr)
+    #     gcd = npgcd(orig_sr, target_sr)
+    #     y_hat = signal.resample_poly(
+    #         y, target_sr // gcd, orig_sr // gcd, axis=axis
+    #     )
+    # elif res_type in (
+    #     'linear',
+    #     'zero_order_hold',
+    #     'sinc_best',
+    #     'sinc_fastest',
+    #     'sinc_medium',
+    # ):
+    import samplerate
+    # Use numpy to vectorize the resampler along the target axis
+    # This is because samplerate does not support ndim>2 generally.
+    y_hat = apply_along_axis(
+        samplerate.resample, axis=axis, arr=y, ratio=ratio, converter_type=res_type, verbose=True
+    )
+    # elif res_type.startswith('soxr'):
+    #     # Use numpy to vectorize the resampler along the target axis
+    #     # This is because soxr does not support ndim>2 generally.
+    #     y_hat = apply_along_axis(
+    #         soxr.resample,
+    #         axis=axis,
+    #         arr=y,
+    #         in_rate=orig_sr,
+    #         out_rate=target_sr,
+    #         quality=res_type,
+    #     )
+    # else:
+    #     import resampy
+    #     y_hat = resampy.resample(y, orig_sr, target_sr, filter=res_type, axis=axis)
 
     if fix:
         y_hat = fix_length(y_hat, size=n_samples, axis=axis, **kwargs)

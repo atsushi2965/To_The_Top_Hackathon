@@ -199,7 +199,7 @@ def play_audio(stream: OutputStream, audio: ndarray):
                 'mono',
                 leave=False,
                 mininterval=RESOLUTION,
-                unit='sample',
+                unit='point',
                 sr=stream.samplerate
             ):
                 if stop_event.is_set():
@@ -212,7 +212,7 @@ def play_audio(stream: OutputStream, audio: ndarray):
                 'ster',
                 leave=False,
                 mininterval=RESOLUTION,
-                unit='sample',
+                unit='point',
                 sr=stream.samplerate
             ):
                 if stop_event.is_set():
